@@ -103,9 +103,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 106151094883014576}
-  - component: {fileID: 4478684074274104644}
+  - component: {fileID: -7295549522190526567}
   m_Layer: 0
-  m_Name: Piase
+  m_Name: Cell
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -127,7 +127,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4478684074274104644
+--- !u!114 &-7295549522190526567
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -136,7 +136,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6818463241780224712}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2af7fe4f3b2fba048995616c361e38bd, type: 3}
+  m_Script: {fileID: 11500000, guid: aee181fef73cf8c45abef0cca0c3dd6c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &7032940250312831804
