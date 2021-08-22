@@ -25,6 +25,32 @@ public class RiversiManager : MonoBehaviour
     void Update()
     {
         TargetField(m_player.SetX(), m_player.SetY());
+
+        if (Input.GetKeyDown(KeyCode.Space)) { SetCell(); }
+    }
+
+    void SetCell()
+    {
+        if (m_fieldCells[m_player.SetX(), m_player.SetY()].RetuneStatus() == FieldStatus.Is)
+        {
+            Debug.Log("すでにある");
+            return;
+        }
+        m_fieldCells[m_player.SetX(), m_player.SetY()].SetStatus(FieldStatus.Is);
+
+        Vector2 setVec = new Vector2(m_player.SetX() - m_wide / 2, m_player.SetY() - m_height / 2);
+        GameObject cell = Instantiate(m_cell.gameObject, setVec, Quaternion.identity);
+        m_cells[m_player.SetX(), m_player.SetY()] = cell.GetComponent<CellClass>();
+        if (m_player.RetuneStatus() == NowPlayer.PlayerBrack)
+        {
+            m_cells[m_player.SetX(), m_player.SetY()].SetCellStatus(CellStatus.Brack);
+            m_player.SetStatus(NowPlayer.PlayerWhite);
+        }
+        else if (m_player.RetuneStatus() == NowPlayer.PlayerWhite)
+        {
+            m_cells[m_player.SetX(), m_player.SetY()].SetCellStatus(CellStatus.White);
+            m_player.SetStatus(NowPlayer.PlayerBrack);
+        }
     }
 
     void CreateField()
@@ -37,7 +63,7 @@ public class RiversiManager : MonoBehaviour
                 GameObject cell = Instantiate(m_fieldCell.gameObject, setVec, Quaternion.identity);
                 cell.name = $"Cell :{x} :{y}";
                 m_fieldCells[x, y] = cell.GetComponent<FieldCellClass>();
-                m_fieldCells[x, y].SetStatus(FieldStatus.Close);
+                m_fieldCells[x, y].SetStatus(FieldStatus.None);
 
                 if (x == 3 && y == 3 || x == 4 && y == 4 || x == 3 && y == 4 || x == 4 && y == 3)
                 {
@@ -46,17 +72,19 @@ public class RiversiManager : MonoBehaviour
             }
         }
     }
-
     void StartSetCell(int x, int y, Vector2 setVec)
     {
         GameObject cell = Instantiate(m_cell.gameObject, setVec, Quaternion.identity);
         m_cells[x, y] = cell.GetComponent<CellClass>();
-        if (x == 3 && y == 3) { m_cells[x, y].SetCellStatus(CellStatus.White); }
-        if (x == 4 && y == 4) { m_cells[x, y].SetCellStatus(CellStatus.White); }
-        if (x == 3 && y == 4) { m_cells[x, y].SetCellStatus(CellStatus.Brack); }
-        if (x == 4 && y == 3) { m_cells[x, y].SetCellStatus(CellStatus.Brack); }
-    }
+        
+        if (x == 3 && y == 3) { m_cells[x, y].SetCellStatus(CellStatus.Brack); }
+        if (x == 4 && y == 4) { m_cells[x, y].SetCellStatus(CellStatus.Brack); }
+        if (x == 3 && y == 4) { m_cells[x, y].SetCellStatus(CellStatus.White); }
+        if (x == 4 && y == 3) { m_cells[x, y].SetCellStatus(CellStatus.White); }
 
+        m_fieldCells[x, y] = FindObjectOfType<FieldCellClass>();
+        m_fieldCells[x, y].SetStatus(FieldStatus.Is);
+    }
     void TargetField(int selectX, int selectY)
     {
         for (int x = 0; x < m_wide; x++)

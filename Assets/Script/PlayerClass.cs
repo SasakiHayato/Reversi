@@ -2,8 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum NowPlayer
+{
+    PlayerBrack,
+    PlayerWhite,
+}
+
 public class PlayerClass : MonoBehaviour
 {
+    NowPlayer m_player = NowPlayer.PlayerBrack;
+
     int m_selectX = 0;
     int m_selectY = 0;
 
@@ -57,4 +65,7 @@ public class PlayerClass : MonoBehaviour
 
     public int SetWide(int wide) { return m_wide = wide; }
     public int SetHeight(int height) { return m_height = height; }
+
+    public NowPlayer RetuneStatus() { return m_player; }
+    public NowPlayer SetStatus(NowPlayer set) { return m_player = set; } 
 }

@@ -4,8 +4,8 @@ using UnityEngine;
 
 public enum FieldStatus
 {
-    Open,
-    Close,
+    Is,
+    None,
 }
 
 public class FieldCellClass : MonoBehaviour

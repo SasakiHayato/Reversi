@@ -22,7 +22,7 @@ public class CellClass : MonoBehaviour
 
     void ChengeCell(CellStatus status)
     {
-        if (status == CellStatus.Brack) { transform.Rotate(0, 0, 0, Space.World); }
-        if (status == CellStatus.White) { transform.Rotate(0, 180, 0, Space.World); }
+        if (status == CellStatus.Brack) { transform.Rotate(0, 180, 0, Space.World); }
+        if (status == CellStatus.White) { transform.Rotate(0, 0, 0, Space.World); }
     }
 }
