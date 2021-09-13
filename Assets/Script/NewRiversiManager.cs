@@ -11,15 +11,23 @@ public class NewRiversiManager : MonoBehaviour
     NewCellClass[,] m_cells = new NewCellClass[8, 8];
 
     NewCellClass.CellState m_nowCellState = NewCellClass.CellState.Brack;
-    NewCellClass.CellState m_enemyCellState = NewCellClass.CellState.White;
 
-    int m_selectX;
-    int m_selectY;
+    [SerializeField] UiManager m_ui;
+
+    int m_selectX = 4;
+    int m_selectY = 4;
+
+    int m_seveInt;
+
+    bool m_check = false;
 
     void Start()
     {
         CreateField();
         FirstSetCell();
+        m_ui.GetText(m_nowCellState.ToString());
+
+        CountCell();
     }
 
     void CreateField()
@@ -67,6 +75,29 @@ public class NewRiversiManager : MonoBehaviour
             m_cells[4, 3].Status = NewCellClass.CellState.White;
             m_fields[4, 3].Status = NewFieldCellClass.FieldState.Is;
         }
+    }
+    void CountCell()
+    {
+        int brackCount = 0;
+        int whiteCount = 0;
+        for (int x = 0; x < 8; x++)
+        {
+            for (int y = 0; y < 8; y++)
+            {
+                if (m_fields[x, y].Status == NewFieldCellClass.FieldState.None) continue;
+                if (m_cells[x, y].Status == NewCellClass.CellState.Brack)
+                {
+                    brackCount++;
+                }
+                else if (m_cells[x, y].Status == NewCellClass.CellState.White)
+                {
+                    whiteCount++;
+                }
+            }
+        }
+
+        m_ui.GetBrackCount(brackCount);
+        m_ui.GetWhiteCount(whiteCount);
     }
 
     void TargetField(int selectX, int selectY)
@@ -125,8 +156,12 @@ public class NewRiversiManager : MonoBehaviour
         {
             CheckCell(m_selectX, m_selectY);
         }
+        else if (Input.GetKeyDown(KeyCode.Space) && m_fields[m_selectX, m_selectY].Status != NewFieldCellClass.FieldState.None)
+        {
+            Debug.Log("すでにある");
+        }
     }
-
+    
     void CheckCell(int x, int y)
     {
         int noneCount = 0;
@@ -135,20 +170,34 @@ public class NewRiversiManager : MonoBehaviour
         Left(x, y, ref noneCount);
         Up(x, y, ref noneCount);
         Down(x, y, ref noneCount);
-
         UpperRight(x, y, ref noneCount);
         UpperLeft(x, y, ref noneCount);
         LowerRight(x, y, ref noneCount);
         LowerLeft(x, y, ref noneCount);
-
-        if (noneCount == 8)
+        Debug.Log(noneCount);
+        Debug.Log(m_check);
+        if (noneCount >= 8 && !m_check)
         {
             Debug.Log("どこもなし");
         }
         else
         {
-            Debug.Log("おける");
+            m_fields[x, y].Status = NewFieldCellClass.FieldState.Is;
+            GameObject set = Instantiate(m_cell.gameObject, new Vector2(x - 8 / 2, y - 8 / 2), Quaternion.identity);
+            m_cells[x, y] = set.GetComponent<NewCellClass>();
+            m_cells[x, y].Status = m_nowCellState;
+            m_cells[x, y].SetCell(m_nowCellState, set);
+
+            if (m_nowCellState == NewCellClass.CellState.Brack) m_nowCellState = NewCellClass.CellState.White;
+            else m_nowCellState = NewCellClass.CellState.Brack;
+
+            m_ui.GetText(m_nowCellState.ToString());
         }
+
+        m_check = false;
+        m_seveInt = 0;
+
+        CountCell();
     }
 
     void Right(int right, int y,ref int count)
@@ -161,19 +210,26 @@ public class NewRiversiManager : MonoBehaviour
         }
         if (m_fields[right, y].Status == NewFieldCellClass.FieldState.None)
         {
-            Debug.Log("右何もなし");
             count++;
             return;
         }
         else if (m_nowCellState == m_cells[right, y].Status)
         {
-            Debug.Log("同じ");
             return;
         }
         else
         {
+            m_seveInt = count;
             Right(right, y, ref count);
-            m_cells[right, y].Chenge(right, y, m_cells);
+            if (m_seveInt == count)
+            {
+                m_cells[right, y].Chenge(right, y, m_cells, m_nowCellState);
+                m_check = true;
+            }
+            else
+            {
+                count++;
+            }
         }
     }
     void Left(int left, int y, ref int count)
@@ -186,19 +242,26 @@ public class NewRiversiManager : MonoBehaviour
         }
         if (m_fields[left, y].Status == NewFieldCellClass.FieldState.None)
         {
-            Debug.Log("左何もなし");
             count++;
             return;
         }
         else if (m_nowCellState == m_cells[left, y].Status)
         {
-            Debug.Log("同じ");
             return;
         }
         else
         {
+            m_seveInt = count;
             Left(left, y, ref count);
-            m_cells[left, y].Chenge(left, y, m_cells);
+            if (m_seveInt == count)
+            {
+                m_cells[left, y].Chenge(left, y, m_cells, m_nowCellState);
+                m_check = true;
+            }
+            else
+            {
+                count++;
+            }
         }
     }
     void Up(int x, int up, ref int count)
@@ -211,19 +274,26 @@ public class NewRiversiManager : MonoBehaviour
         }
         if (m_fields[x, up].Status == NewFieldCellClass.FieldState.None)
         {
-            Debug.Log("上何もなし");
             count++;
             return;
         }
         else if (m_nowCellState == m_cells[x, up].Status)
         {
-            Debug.Log("同じ");
             return;
         }
         else
         {
+            m_seveInt = count;
             Up(x, up, ref count);
-            m_cells[x, up].Chenge(x, up, m_cells);
+            if (m_seveInt == count)
+            {
+                m_cells[x, up].Chenge(x, up, m_cells, m_nowCellState);
+                m_check = true;
+            }
+            else
+            {
+                count++;
+            }
         }
     }
     void Down(int x, int down, ref int count)
@@ -236,19 +306,27 @@ public class NewRiversiManager : MonoBehaviour
         }
         if (m_fields[x, down].Status == NewFieldCellClass.FieldState.None)
         {
-            Debug.Log("下何もなし");
             count++;
             return;
         }
         else if (m_nowCellState == m_cells[x, down].Status)
         {
-            Debug.Log("同じ");
+            
             return;
         }
         else
         {
+            m_seveInt = count;
             Down(x, down, ref count);
-            m_cells[x, down].Chenge(x, down, m_cells);
+            if (m_seveInt == count)
+            {
+                m_cells[x, down].Chenge(x, down, m_cells, m_nowCellState);
+                m_check = true;
+            }
+            else
+            {
+                count++;
+            }
         }
     }
 
@@ -263,19 +341,26 @@ public class NewRiversiManager : MonoBehaviour
         }
         if (m_fields[right, up].Status == NewFieldCellClass.FieldState.None)
         {
-            Debug.Log("右上何もなし");
             count++;
             return;
         }
         else if (m_nowCellState == m_cells[right, up].Status)
         {
-            Debug.Log("同じ");
             return;
         }
         else
         {
+            m_seveInt = count;
             UpperRight(right, up, ref count);
-            m_cells[right, up].Chenge(right, up, m_cells);
+            if (m_seveInt == count)
+            {
+                m_cells[right, up].Chenge(right, up, m_cells, m_nowCellState);
+                m_check = true;
+            }
+            else
+            {
+                count++;
+            }
         }
     }
     void UpperLeft(int left, int up, ref int count)
@@ -289,19 +374,26 @@ public class NewRiversiManager : MonoBehaviour
         }
         if (m_fields[left, up].Status == NewFieldCellClass.FieldState.None)
         {
-            Debug.Log("左上何もなし");
             count++;
             return;
         }
         else if (m_nowCellState == m_cells[left, up].Status)
         {
-            Debug.Log("同じ");
             return;
         }
         else
         {
+            m_seveInt = count;
             UpperLeft(left, up, ref count);
-            m_cells[left, up].Chenge(left, up, m_cells);
+            if (m_seveInt == count)
+            {
+                m_cells[left, up].Chenge(left, up, m_cells, m_nowCellState);
+                m_check = true;
+            }
+            else
+            {
+                count++;
+            }
         }
     }
     void LowerRight(int right, int down, ref int count)
@@ -315,19 +407,26 @@ public class NewRiversiManager : MonoBehaviour
         }
         if (m_fields[right, down].Status == NewFieldCellClass.FieldState.None)
         {
-            Debug.Log("右下何もなし");
             count++;
             return;
         }
         else if (m_nowCellState == m_cells[right, down].Status)
         {
-            Debug.Log("同じ");
             return;
         }
         else
         {
+            m_seveInt = count;
             LowerRight(right, down, ref count);
-            m_cells[right, down].Chenge(right, down, m_cells);
+            if (m_seveInt == count)
+            {
+                m_cells[right, down].Chenge(right, down, m_cells, m_nowCellState);
+                m_check = true;
+            }
+            else
+            {
+                count++;
+            }
         }
     }
     void LowerLeft(int left, int down, ref int count)
@@ -341,19 +440,26 @@ public class NewRiversiManager : MonoBehaviour
         }
         if (m_fields[left, down].Status == NewFieldCellClass.FieldState.None)
         {
-            Debug.Log("左下何もなし");
             count++;
             return;
         }
         else if (m_nowCellState == m_cells[left, down].Status)
         {
-            Debug.Log("同じ");
             return;
         }
         else
         {
+            m_seveInt = count;
             LowerLeft(left, down, ref count);
-            m_cells[left, down].Chenge(left, down, m_cells);
+            if (m_seveInt == count)
+            {
+                m_cells[left, down].Chenge(left, down, m_cells, m_nowCellState);
+                m_check = true;
+            }
+            else
+            {
+                count++;
+            }
         }
     }
 }
