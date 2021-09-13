@@ -36,7 +36,11 @@ public class NewRiversiManager : MonoBehaviour
         CountCell();
     }
 
-    public void OnClickStart() => GameManager.getInstance().SetIsPlay(true);
+    public void OnClickStart()
+    {
+        m_ui.SetUiForStart();
+        GameManager.getInstance().SetIsPlay(true);
+    }
     
     void CreateField()
     {
@@ -188,14 +192,8 @@ public class NewRiversiManager : MonoBehaviour
     {
         m_canSetCell = false;
         int noneCount = 0;
-        if (m_nowCellState == NewCellClass.CellState.Brack)
-        {
-            m_nowCellState = NewCellClass.CellState.White;
-        }
-        else
-        {
-            m_nowCellState = NewCellClass.CellState.Brack;
-        }
+        if (m_nowCellState == NewCellClass.CellState.Brack) m_nowCellState = NewCellClass.CellState.White;
+        else m_nowCellState = NewCellClass.CellState.Brack;
 
         for (int x = 0; x < 8; x++)
         {
@@ -214,7 +212,14 @@ public class NewRiversiManager : MonoBehaviour
             }
         }
 
-        if (noneCount >= 1 && !m_canSetCell) Debug.Log("Pass");
+        if (noneCount >= 1 && !m_canSetCell)
+        {
+            if (m_nowCellState == NewCellClass.CellState.Brack) m_nowCellState = NewCellClass.CellState.White;
+            else m_nowCellState = NewCellClass.CellState.Brack;
+            m_ui.SetMsgImage("Pass");
+        }
+
+        m_canSetCell = false;
     }
     
     void SetCellAndChengePlayer(int x, int y)
@@ -227,17 +232,6 @@ public class NewRiversiManager : MonoBehaviour
 
         CanSetBool();
         
-        if (m_canSetCell)
-        {
-
-        }
-        else
-        {
-            if (m_nowCellState == NewCellClass.CellState.Brack) m_nowCellState = NewCellClass.CellState.White;
-            else m_nowCellState = NewCellClass.CellState.Brack;
-            m_ui.SetMsgImage("Pass");
-        }
-        m_canSetCell = false;
         m_ui.GetText(m_nowCellState.ToString());
     }
 

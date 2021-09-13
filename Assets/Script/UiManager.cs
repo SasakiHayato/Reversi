@@ -10,11 +10,18 @@ public class UiManager : MonoBehaviour
     [SerializeField] Text m_whiteCount;
     [SerializeField] GameObject m_CannotPutImage;
     [SerializeField] GameObject m_resultImage;
+    [SerializeField] GameObject m_titleImage;
+    [SerializeField] GameObject m_button;
 
     public void GetText(string set) => m_playerText.text = $"Player:{set}";
     public void GetBrackCount(int set) => m_brackCount.text = $"Brack:{set}";
     public void GetWhiteCount(int set) => m_whiteCount.text = $"White:{set}";
 
+    public void SetUiForStart()
+    {
+        m_button.SetActive(false);
+        m_titleImage.SetActive(false);
+    }
     public void SetMsgImage(string set)
     {
         m_CannotPutImage.SetActive(true);
