@@ -20,6 +20,8 @@ public class NewRiversiManager : MonoBehaviour
     int m_seveInt;
 
     bool m_check = false;
+    bool m_isChenge = false;
+    bool m_canSetCell = false;
 
     void Start()
     {
@@ -115,49 +117,6 @@ public class NewRiversiManager : MonoBehaviour
             else m_ui.SetResultImage("None");
         }
     }
-    bool SetCellCheck()
-    {
-        bool result = true;
-        for (int x = 0; x < 8; x++)
-        {
-            for (int y = 0; y < 8; y++)
-            {
-                int count = 0;
-                for (int targetX  = x - 1; targetX  <= x + 1; targetX++)
-                {
-                    for (int targetY = y - 1; targetY <= y + 1; targetY++)
-                    {
-                        if (targetX < 0 || targetX >= 8) continue;
-                        if (targetY < 0 || targetY >= 8) continue;
-                        if (targetX == x && targetY == y) continue;
-                        if (m_fields[x, y].Status == NewFieldCellClass.FieldState.Is) continue;
-                        if (m_fields[targetX, targetY].Status == NewFieldCellClass.FieldState.None)
-                        {
-                            count++;
-                            continue;
-                        }
-
-                        if (m_nowCellState == m_cells[targetX, targetY].Status)
-                        {
-                            count++;
-                            
-                            if(count == 8)
-                            {
-                                Debug.Log("置けるところなし");
-                            }
-                        }
-                        else
-                        {
-                            result = false;
-                        }
-                        
-                    }
-                }
-            }
-        }
-
-        return result;
-    }
 
     void TargetField(int selectX, int selectY)
     {
@@ -224,6 +183,39 @@ public class NewRiversiManager : MonoBehaviour
             m_ui.SetMsgImage("Already put");
         }
     }
+
+    void CanSetBool()
+    {
+        m_canSetCell = false;
+        int noneCount = 0;
+        if (m_nowCellState == NewCellClass.CellState.Brack)
+        {
+            m_nowCellState = NewCellClass.CellState.White;
+        }
+        else
+        {
+            m_nowCellState = NewCellClass.CellState.Brack;
+        }
+
+        for (int x = 0; x < 8; x++)
+        {
+            for (int y = 0; y < 8; y++)
+            {
+                if (m_fields[x, y].Status == NewFieldCellClass.FieldState.Is) continue;
+
+                Right(x, y, ref noneCount);
+                Left(x, y, ref noneCount);
+                Up(x, y, ref noneCount);
+                Down(x, y, ref noneCount);
+                UpperRight(x, y, ref noneCount);
+                UpperLeft(x, y, ref noneCount);
+                LowerRight(x, y, ref noneCount);
+                LowerLeft(x, y, ref noneCount);
+            }
+        }
+
+        if (noneCount >= 1 && !m_canSetCell) Debug.Log("Pass");
+    }
     
     void SetCellAndChengePlayer(int x, int y)
     {
@@ -232,16 +224,26 @@ public class NewRiversiManager : MonoBehaviour
         m_cells[x, y] = set.GetComponent<NewCellClass>();
         m_cells[x, y].Status = m_nowCellState;
         m_cells[x, y].SetCell(m_nowCellState, set);
-        bool result = SetCellCheck();
-        Debug.Log(result);
-        if (m_nowCellState == NewCellClass.CellState.Brack) m_nowCellState = NewCellClass.CellState.White;
-        else m_nowCellState = NewCellClass.CellState.Brack;
 
+        CanSetBool();
+        
+        if (m_canSetCell)
+        {
+
+        }
+        else
+        {
+            if (m_nowCellState == NewCellClass.CellState.Brack) m_nowCellState = NewCellClass.CellState.White;
+            else m_nowCellState = NewCellClass.CellState.Brack;
+            m_ui.SetMsgImage("Pass");
+        }
+        m_canSetCell = false;
         m_ui.GetText(m_nowCellState.ToString());
     }
 
     bool CheckCell(int x, int y)
     {
+        m_isChenge = true;
         bool result = false;
         int noneCount = 0;
 
@@ -259,7 +261,7 @@ public class NewRiversiManager : MonoBehaviour
        
         m_check = false;
         m_seveInt = 0;
-
+        m_isChenge = false;
         return result;
     }
 
@@ -286,8 +288,12 @@ public class NewRiversiManager : MonoBehaviour
             Right(right, y, ref count);
             if (m_seveInt == count)
             {
-                m_cells[right, y].Chenge(right, y, m_cells, m_nowCellState);
-                m_check = true;
+                if (m_isChenge)
+                {
+                    m_cells[right, y].Chenge(right, y, m_cells, m_nowCellState);
+                    m_check = true;
+                }
+                m_canSetCell = true;
             }
             else
             {
@@ -318,8 +324,12 @@ public class NewRiversiManager : MonoBehaviour
             Left(left, y, ref count);
             if (m_seveInt == count)
             {
-                m_cells[left, y].Chenge(left, y, m_cells, m_nowCellState);
-                m_check = true;
+                if (m_isChenge)
+                {
+                    m_cells[left, y].Chenge(left, y, m_cells, m_nowCellState);
+                    m_check = true;
+                }
+                m_canSetCell = true;
             }
             else
             {
@@ -350,8 +360,12 @@ public class NewRiversiManager : MonoBehaviour
             Up(x, up, ref count);
             if (m_seveInt == count)
             {
-                m_cells[x, up].Chenge(x, up, m_cells, m_nowCellState);
-                m_check = true;
+                if (m_isChenge)
+                {
+                    m_cells[x, up].Chenge(x, up, m_cells, m_nowCellState);
+                    m_check = true;
+                }
+                m_canSetCell = true;
             }
             else
             {
@@ -383,8 +397,12 @@ public class NewRiversiManager : MonoBehaviour
             Down(x, down, ref count);
             if (m_seveInt == count)
             {
-                m_cells[x, down].Chenge(x, down, m_cells, m_nowCellState);
-                m_check = true;
+                if (m_isChenge)
+                {
+                    m_cells[x, down].Chenge(x, down, m_cells, m_nowCellState);
+                    m_check = true;
+                }
+                m_canSetCell = true;
             }
             else
             {
@@ -417,8 +435,12 @@ public class NewRiversiManager : MonoBehaviour
             UpperRight(right, up, ref count);
             if (m_seveInt == count)
             {
-                m_cells[right, up].Chenge(right, up, m_cells, m_nowCellState);
-                m_check = true;
+                if (m_isChenge)
+                {
+                    m_cells[right, up].Chenge(right, up, m_cells, m_nowCellState);
+                    m_check = true;
+                }
+                m_canSetCell = true;
             }
             else
             {
@@ -450,8 +472,12 @@ public class NewRiversiManager : MonoBehaviour
             UpperLeft(left, up, ref count);
             if (m_seveInt == count)
             {
-                m_cells[left, up].Chenge(left, up, m_cells, m_nowCellState);
-                m_check = true;
+                if (m_isChenge)
+                {
+                    m_cells[left, up].Chenge(left, up, m_cells, m_nowCellState);
+                    m_check = true;
+                }
+                m_canSetCell = true;
             }
             else
             {
@@ -483,8 +509,12 @@ public class NewRiversiManager : MonoBehaviour
             LowerRight(right, down, ref count);
             if (m_seveInt == count)
             {
-                m_cells[right, down].Chenge(right, down, m_cells, m_nowCellState);
-                m_check = true;
+                if (m_isChenge)
+                {
+                    m_cells[right, down].Chenge(right, down, m_cells, m_nowCellState);
+                    m_check = true;
+                }
+                m_canSetCell = true;
             }
             else
             {
@@ -516,8 +546,12 @@ public class NewRiversiManager : MonoBehaviour
             LowerLeft(left, down, ref count);
             if (m_seveInt == count)
             {
-                m_cells[left, down].Chenge(left, down, m_cells, m_nowCellState);
-                m_check = true;
+                if (m_isChenge)
+                {
+                    m_cells[left, down].Chenge(left, down, m_cells, m_nowCellState);
+                    m_check = true;
+                }
+                m_canSetCell = true;
             }
             else
             {
