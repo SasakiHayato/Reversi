@@ -96,8 +96,56 @@ public class NewRiversiManager : MonoBehaviour
             }
         }
 
+        if (brackCount == 0 || whiteCount == 0)
+        {
+            
+        }
+
         m_ui.GetBrackCount(brackCount);
         m_ui.GetWhiteCount(whiteCount);
+    }
+    bool SetCellCheck()
+    {
+        bool result = true;
+        for (int x = 0; x < 8; x++)
+        {
+            for (int y = 0; y < 8; y++)
+            {
+                int count = 0;
+                for (int targetX  = x - 1; targetX  <= x + 1; targetX++)
+                {
+                    for (int targetY = y - 1; targetY <= y + 1; targetY++)
+                    {
+                        if (targetX < 0 || targetX >= 8) continue;
+                        if (targetY < 0 || targetY >= 8) continue;
+                        if (targetX == x && targetY == y) continue;
+                        if (m_fields[x, y].Status == NewFieldCellClass.FieldState.Is) continue;
+                        if (m_fields[targetX, targetY].Status == NewFieldCellClass.FieldState.None)
+                        {
+                            count++;
+                            continue;
+                        }
+
+                        if (m_nowCellState == m_cells[targetX, targetY].Status)
+                        {
+                            count++;
+                            
+                            if(count == 8)
+                            {
+                                Debug.Log("置けるところなし");
+                            }
+                        }
+                        else
+                        {
+                            result = false;
+                        }
+                        Debug.Log(count);
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     void TargetField(int selectX, int selectY)
@@ -154,16 +202,34 @@ public class NewRiversiManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && m_fields[m_selectX, m_selectY].Status == NewFieldCellClass.FieldState.None)
         {
-            CheckCell(m_selectX, m_selectY);
+            bool set = CheckCell(m_selectX, m_selectY);
+            if (set) SetCellAndChengePlayer(m_selectX, m_selectY);
+            CountCell();
         }
         else if (Input.GetKeyDown(KeyCode.Space) && m_fields[m_selectX, m_selectY].Status != NewFieldCellClass.FieldState.None)
         {
-            Debug.Log("すでにある");
+            m_ui.SetMsgImage("Already put");
         }
     }
     
-    void CheckCell(int x, int y)
+    void SetCellAndChengePlayer(int x, int y)
     {
+        m_fields[x, y].Status = NewFieldCellClass.FieldState.Is;
+        GameObject set = Instantiate(m_cell.gameObject, new Vector2(x - 8 / 2, y - 8 / 2), Quaternion.identity);
+        m_cells[x, y] = set.GetComponent<NewCellClass>();
+        m_cells[x, y].Status = m_nowCellState;
+        m_cells[x, y].SetCell(m_nowCellState, set);
+        bool result = SetCellCheck();
+        Debug.Log(result);
+        if (m_nowCellState == NewCellClass.CellState.Brack) m_nowCellState = NewCellClass.CellState.White;
+        else m_nowCellState = NewCellClass.CellState.Brack;
+
+        m_ui.GetText(m_nowCellState.ToString());
+    }
+
+    bool CheckCell(int x, int y)
+    {
+        bool result = false;
         int noneCount = 0;
 
         Right(x, y, ref noneCount);
@@ -174,30 +240,14 @@ public class NewRiversiManager : MonoBehaviour
         UpperLeft(x, y, ref noneCount);
         LowerRight(x, y, ref noneCount);
         LowerLeft(x, y, ref noneCount);
-        Debug.Log(noneCount);
-        Debug.Log(m_check);
-        if (noneCount >= 8 && !m_check)
-        {
-            Debug.Log("どこもなし");
-        }
-        else
-        {
-            m_fields[x, y].Status = NewFieldCellClass.FieldState.Is;
-            GameObject set = Instantiate(m_cell.gameObject, new Vector2(x - 8 / 2, y - 8 / 2), Quaternion.identity);
-            m_cells[x, y] = set.GetComponent<NewCellClass>();
-            m_cells[x, y].Status = m_nowCellState;
-            m_cells[x, y].SetCell(m_nowCellState, set);
-
-            if (m_nowCellState == NewCellClass.CellState.Brack) m_nowCellState = NewCellClass.CellState.White;
-            else m_nowCellState = NewCellClass.CellState.Brack;
-
-            m_ui.GetText(m_nowCellState.ToString());
-        }
-
+        
+        if (noneCount >= 1 && !m_check) m_ui.SetMsgImage("Can't put");
+        else result = true;
+       
         m_check = false;
         m_seveInt = 0;
 
-        CountCell();
+        return result;
     }
 
     void Right(int right, int y,ref int count)
