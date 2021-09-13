@@ -23,6 +23,10 @@ public class NewRiversiManager : MonoBehaviour
 
     void Start()
     {
+        Set();
+    }
+    void Set()
+    {
         CreateField();
         FirstSetCell();
         m_ui.GetText(m_nowCellState.ToString());
@@ -30,6 +34,8 @@ public class NewRiversiManager : MonoBehaviour
         CountCell();
     }
 
+    public void OnClickStart() => GameManager.getInstance().SetIsPlay(true);
+    
     void CreateField()
     {
         for (int x = 0; x < 8; x++)
@@ -96,13 +102,18 @@ public class NewRiversiManager : MonoBehaviour
             }
         }
 
-        if (brackCount == 0 || whiteCount == 0)
-        {
-            
-        }
+        if (brackCount == 0) m_ui.SetResultImage("White");
+        if (whiteCount == 0) m_ui.SetResultImage("Brack");
 
         m_ui.GetBrackCount(brackCount);
         m_ui.GetWhiteCount(whiteCount);
+
+        if (brackCount + whiteCount == 64)
+        {
+            if (brackCount < whiteCount) m_ui.SetResultImage("White");
+            else if (brackCount > whiteCount) m_ui.SetResultImage("Brack");
+            else m_ui.SetResultImage("None");
+        }
     }
     bool SetCellCheck()
     {
@@ -139,7 +150,7 @@ public class NewRiversiManager : MonoBehaviour
                         {
                             result = false;
                         }
-                        Debug.Log(count);
+                        
                     }
                 }
             }
@@ -165,6 +176,8 @@ public class NewRiversiManager : MonoBehaviour
 
     void Update()
     {
+        if (!GameManager.getInstance().IsPlay) return;
+        
         TargetField(m_selectX, m_selectY);
 
         if (Input.GetKeyDown(KeyCode.RightArrow))
