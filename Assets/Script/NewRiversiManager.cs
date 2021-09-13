@@ -31,7 +31,6 @@ public class NewRiversiManager : MonoBehaviour
     {
         CreateField();
         FirstSetCell();
-        m_ui.GetText(m_nowCellState.ToString());
 
         CountCell();
     }
@@ -39,6 +38,7 @@ public class NewRiversiManager : MonoBehaviour
     public void OnClickStart()
     {
         m_ui.SetUiForStart();
+        m_ui.GetText(m_nowCellState.ToString(), (int)m_nowCellState);
         GameManager.getInstance().SetIsPlay(true);
     }
     
@@ -231,8 +231,7 @@ public class NewRiversiManager : MonoBehaviour
         m_cells[x, y].SetCell(m_nowCellState, set);
 
         CanSetBool();
-        
-        m_ui.GetText(m_nowCellState.ToString());
+        m_ui.GetText(m_nowCellState.ToString(), (int)m_nowCellState);
     }
 
     bool CheckCell(int x, int y)
